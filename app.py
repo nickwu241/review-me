@@ -1,7 +1,11 @@
 import os
-
+from itertools import chain
+from dateutil.parser import parse
+from pytz import UTC
 from flask import Flask, request, abort, jsonify
+from flask_cors import CORS
 from github import Github
+
 import boto3
 import requests
 
@@ -10,6 +14,7 @@ SLACK_INCOMING_WEBHOOK_URL = os.environ['REVIEWME_SLACK_URL']
 g = Github(GH_TOKEN)
 
 app = Flask(__name__)
+CORS(app)
 
 class Status(object):
     READY = '- [x] READY FOR REVIEW'
@@ -34,7 +39,8 @@ class Status(object):
 
     @property
     def is_ready(self):
-        return READY in self.comment
+        # First line is READY or NOT_READY
+        return self.READY in self.comment.body.split('\n')[0]
 
     @property
     def reviewers(self):
@@ -42,7 +48,10 @@ class Status(object):
         return [rline.lstrip('- ') for rline in self.comment.body.split('\n')[1:]]
 
     def uncheck(self):
-        self.comment.edit(self.NOT_READY + '\n' + '\n'.join(self.reviewers))
+        message = self.NOT_READY
+        if self.reviewers:
+            message += '\n-' + '\n- '.join(self.reviewers)
+        self.comment.edit(message)
 
     def add_reviewers(self, reviewers):
         for r in reviewers:
@@ -55,10 +64,48 @@ class Status(object):
         if not self.is_ready:
             return False
 
-        # TODO: Check if should_notify
-        # self.pr.get_issue_comments()
-        # self.pr.get_review_comments()
-        # self.comment.last_updated
+        resp = requests.get('https://api.github.com/repos/nickwu241/review-me/pulls/{}/reviews'.format(self.pr_number))
+        if resp.status_code != requests.codes.ok:
+            abort(500, "failed to access github reviews API")
+
+        last_updated = self.comment.updated_at.replace(tzinfo=UTC)
+        reviews_needed = {}
+        approved_by = set()
+
+        for review in resp.json():
+            username = review['user']['login']
+            if username not in self.reviewers:
+                continue
+
+            submitted_at = parse(review['submitted_at']).replace(tzinfo=UTC)
+            print(submitted_at, last_updated)
+            state_is_pending = review['state'] == 'PENDING'
+            state_is_approved = review['state'] == 'APPROVED'
+            asked_after_review = last_updated > submitted_at
+            print('state:', review['state'])
+            print('asked_after_review:', asked_after_review)
+            if state_is_approved:
+                approved_by.add(username)
+                continue
+
+            if state_is_pending or asked_after_review:
+                reviews_needed[username] = max(reviews_need[username], last_updated - submitted_at)
+
+        for comment in chain(self.pr.get_issue_comments(), self.pr.get_review_comments()):
+            username = comment.user.login
+            if username in approved_by or username not in self.reviewers:
+                continue
+
+            submitted_at = comment.updated_at.replace(tzinfo=UTC)
+            print(submitted_at, last_updated)
+            asked_after_review = last_updated > submitted_at
+            print('asked_after_review:', asked_after_review)
+            if asked_after_review:
+                reviews_needed[username] = max(reviews_needed[username], last_updated - submitted_at)
+
+        print(reviews_needed)
+        print(approved_by)
+        return len(reviews_needed) > 0
 
 
 class Notifier(object):
@@ -110,8 +157,22 @@ def notifications():
     messages = ['<{}|{}> ({}) at {}'.format(
                     n.subject.url, n.subject.title, n.subject.type, n.updated_at
                 ) for n in notifications]
+
+    if len(messages) == 0:
+        return jsonify(notifications=False)
+
     Notifier.slack('{:d} unread GH Notifcations:\n{}'.format(len(messages), '\n'.join(messages)))
-    return jsonify(notifications=len(messages) != 0)
+    return jsonify(notifications=True)
+
+@app.route('/should_notify', methods=['GET'])
+def should_notify():
+    s = Status('nickwu241/review-me', 4)
+    n = s.should_notify()
+    print('should_notify:', n)
+    if n:
+        Notifier.notify(s)
+
+    return(jsonify(n))
 
 def handle_issue_comment(payload):
     repo_id = payload['repository']['id']
