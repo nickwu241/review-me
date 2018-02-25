@@ -13,6 +13,6 @@ Review Me offers automatic notifications to remind PR reviewers, multi-repo issu
 Built using: React, Flask, AWS (EC2, SNS, SQS, SMS, SES, S3, DynamoDB), Github API, Github Webhooks, Slack API, Javascript, Python, and <3
 
 ## Demo
-<img src="/demo/dashboard1.png" width="360" height="640" />
-<img src="/demo/dashboard2.png" width="360" height="640" />
-<img src="/demo/issues.png" width="360" height="640" />
+<img src="/demo/dashboard1.png" />
+<img src="/demo/dashboard2.png" />
+<img src="/demo/issues.png" />
