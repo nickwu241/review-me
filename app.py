@@ -199,7 +199,7 @@ def issues():
                 'labels': [{'name': l.name, 'color': l.color} for l in issue.labels]
             })
 
-    return jsonify(all_issues)
+    return jsonify(sorted(all_issues, key=lambda i: i['created_at'], reverse=True))
 
 def handle_issue_comment(payload):
     repo_id = payload['repository']['id']
