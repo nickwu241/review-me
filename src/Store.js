@@ -1,5 +1,5 @@
 export const Store = {
-    refreshRate: 10,
+    refreshRate: 1,
     checkReviews: false,
     checkNotifications: false,
     inputRepo: '',
