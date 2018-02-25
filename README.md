@@ -1,5 +1,4 @@
 # Review Me
-Automatic notifications to remind PR reviewers, multi-repo issue list, and slack notifications for un-read Github notifications for better productivity
 Have you ever
 
 - had to wait forever for your Pull Requests (PRs) to get reviewed because your reviewers forgot about your PR?
