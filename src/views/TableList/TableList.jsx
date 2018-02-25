@@ -70,7 +70,7 @@ class TableList extends Component {
                                                             prop.map((prop, key) => {
                                                                 return (
                                                                     <td key={key}>
-                                                                        {(key === 0 || key === 1) && <a href={prop[1]} style={{ color: '#6cc644' }}>{prop[0]}</a>}
+                                                                        {(key === 0 || key === 1) && <a href={prop[1]} style={{ color: '#bd2c00' }}>{prop[0]}</a>}
                                                                         {(key >= 2) && prop}
                                                                     </td>
                                                                 );
