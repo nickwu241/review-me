@@ -1,169 +1,82 @@
 import React, { Component } from 'react';
-import ChartistGraph from 'react-chartist';
 import { Grid, Row, Col } from 'react-bootstrap';
 
+import ReviewMeAPI from '../../ReviewMeAPI'
 
-import {Card} from '../../components/Card/Card.jsx';
-import {StatsCard} from '../../components/StatsCard/StatsCard.jsx';
-import {Tasks} from '../../components/Tasks/Tasks.jsx';
-import {
-    dataPie,
-    legendPie,
-    dataSales,
-    optionsSales,
-    responsiveSales,
-    legendSales,
-    dataBar,
-    optionsBar,
-    responsiveBar,
-    legendBar
-} from '../../variables/Variables.jsx';
+import Switch from 'material-ui/Switch'
+import Input from 'material-ui/Input'
 
 class Dashboard extends Component {
-    createLegend(json){
-        var legend = [];
-        for(var i = 0; i < json["names"].length; i++){
-            var type = "fa fa-circle text-"+json["types"][i];
-            legend.push(
-                <i className={type} key={i}></i>
-            );
-            legend.push(" ");
-            legend.push(
-                json["names"][i]
-            );
+    constructor(props) {
+        super(props)
+        this.NOTIFCATION_TICK_MS = 3000
+        this.MS_PER_S = 1000
+        this.API = new ReviewMeAPI()
+        this.state = {
+            issues: [],
+            refreshRate: 10,
+            checkReviews: false,
+            checkSMS: false,
+            checkSlack: false,
+            checkNotifications: false
         }
-        return legend;
+    }
+    tick = () => {
+        if (!this.state.checkReviews) {
+            return
+        }
+        this.API.should_notify()
+    }
+    notifcationTick = () => {
+        if (!this.state.checkNotifications) {
+            return
+        }
+        this.API.notifications()
+    }
+    handleRefreshRate = e => {
+        let rate = parseInt(e.target.value, 10)
+        this.setState({ refreshRate: rate })
+        clearInterval(this.tickTimer)
+        if (!this.state.refreshRate) {
+            return
+        }
+        let ms = rate * this.MS_PER_S
+        this.tickTimer = setInterval(this.tick, ms)
+    }
+    handleReviews = (e, checked) => this.setState({ checkReviews: checked })
+    handleSlack = (e, checked) => this.setState({ checkSlack: checked })
+    handleNotifications = (e, checked) => this.setState({ checkNotifications: checked })
+    componentDidMount() {
+        console.log('Dashbaord mount')
+        let ms = this.state.refreshRate * this.MS_PER_S
+        this.tickTimer = setInterval(this.tick, ms)
+        this.notificationTickTimer = setInterval(this.notifcationTick, this.NOTIFCATION_TICK_MS)
+    }
+    componentWillUnmount() {
+        console.log('Dashbaord unmount')
+        clearInterval(this.tickTimer)
+        clearInterval(this.notificationTickTimer)
     }
     render() {
         return (
             <div className="content">
                 <Grid fluid>
                     <Row>
-                        <Col lg={3} sm={6}>
-                            <StatsCard
-                                bigIcon={<i className="pe-7s-server text-warning"></i>}
-                                statsText="Capacity"
-                                statsValue="105GB"
-                                statsIcon={<i className="fa fa-refresh"></i>}
-                                statsIconText="Updated now"
-                            />
-                        </Col>
-                        <Col lg={3} sm={6}>
-                            <StatsCard
-                                bigIcon={<i className="pe-7s-wallet text-success"></i>}
-                                statsText="Revenue"
-                                statsValue="$1,345"
-                                statsIcon={<i className="fa fa-calendar-o"></i>}
-                                statsIconText="Last day"
-                            />
-                        </Col>
-                        <Col lg={3} sm={6}>
-                            <StatsCard
-                                bigIcon={<i className="pe-7s-graph1 text-danger"></i>}
-                                statsText="Errors"
-                                statsValue="23"
-                                statsIcon={<i className="fa fa-clock-o"></i>}
-                                statsIconText="In the last hour"
-                            />
-                        </Col>
-                        <Col lg={3} sm={6}>
-                            <StatsCard
-                                bigIcon={<i className="fa fa-twitter text-info"></i>}
-                                statsText="Followers"
-                                statsValue="+45"
-                                statsIcon={<i className="fa fa-refresh"></i>}
-                                statsIconText="Updated now"
-                            />
+                        <Col>
+                            <Switch onChange={this.handleReviews} checked={this.state.checkReviews} /> Ask for Reviews
+                            <span>, Rate: <Input type="number"
+                                placeholder="Rate"
+                                style={{ width: '40px' }}
+                                value={this.state.refreshRate}
+                                onChange={this.handleRefreshRate} />s
+                            </span>
                         </Col>
                     </Row>
                     <Row>
-                        <Col md={8}>
-                            <Card
-                                statsIcon="fa fa-history"
-                                id="chartHours"
-                                title="Users Behavior"
-                                category="24 Hours performance"
-                                stats="Updated 3 minutes ago"
-                                content={
-                                    <div className="ct-chart">
-                                        <ChartistGraph
-                                            data={dataSales}
-                                            type="Line"
-                                            options={optionsSales}
-                                            responsiveOptions={responsiveSales}
-                                        />
-                                    </div>
-                                    }
-                                legend={
-                                    <div className="legend">
-                                        {this.createLegend(legendSales)}
-                                    </div>
-                                }
-                            />
-                        </Col>
-                        <Col md={4}>
-                            <Card
-                                statsIcon="fa fa-clock-o"
-                                title="Email Statistics"
-                                category="Last Campaign Performance"
-                                stats="Campaign sent 2 days ago"
-                                content={
-                                    <div id="chartPreferences" className="ct-chart ct-perfect-fourth">
-                                        <ChartistGraph data={dataPie} type="Pie"/>
-                                    </div>
-                                }
-                                legend={
-                                    <div className="legend">
-                                        {this.createLegend(legendPie)}
-                                    </div>
-                                }
-                            />
+                        <Col>
+                            <Switch onChange={this.handleNotifications} checked={this.state.checkNotifications} /> Check for Unread Notifications
                         </Col>
                     </Row>
-
-                    <Row>
-                        <Col md={6}>
-                            <Card
-                                id="chartActivity"
-                                title="2014 Sales"
-                                category="All products including Taxes"
-                                stats="Data information certified"
-                                statsIcon="fa fa-check"
-                                content={
-                                    <div className="ct-chart">
-                                        <ChartistGraph
-                                            data={dataBar}
-                                            type="Bar"
-                                            options={optionsBar}
-                                            responsiveOptions={responsiveBar}
-                                        />
-                                    </div>
-                                }
-                                legend={
-                                    <div className="legend">
-                                        {this.createLegend(legendBar)}
-                                    </div>
-                                }
-                            />
-                        </Col>
-
-                        <Col md={6}>
-                            <Card
-                                title="Tasks"
-                                category="Backend development"
-                                stats="Updated 3 minutes ago"
-                                statsIcon="fa fa-history"
-                                content={
-                                    <div className="table-full-width">
-                                        <table className="table">
-                                            <Tasks />
-                                        </table>
-                                    </div>
-                                }
-                            />
-                        </Col>
-                    </Row>
-
                 </Grid>
             </div>
         );
