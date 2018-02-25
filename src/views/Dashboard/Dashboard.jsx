@@ -17,7 +17,7 @@ import List, {
 class Dashboard extends Component {
     constructor(props) {
         super(props)
-        this.NOTIFCATION_TICK_MS = 3000
+        this.NOTIFCATION_TICK_MS = 10000
         this.MS_PER_S = 1000
         this.API = new ReviewMeAPI()
         this.state = {
