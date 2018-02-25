@@ -139,8 +139,11 @@ class Notifier(object):
         print(message)
 
     @staticmethod
-    def slack(message):
-        requests.post(Notifier.SLACK_INCOMING_WEBHOOK_URL, json={'text': message})
+    def slack(message, channel_private=False):
+        payload = {'text': message, 'channel': 'review-me-demo'}
+        if channel_private:
+            payload.pop('channel')
+        requests.post(Notifier.SLACK_INCOMING_WEBHOOK_URL, json=payload)
 
     @staticmethod
     def sns(message):
@@ -178,7 +181,7 @@ def notifications():
     if len(messages) == 0:
         return jsonify(notifications=False)
     msg = '{:d} unread GH Notifcations:\n{}'.format(len(messages), '\n'.join(messages))
-    Notifier.slack(msg)
+    Notifier.slack(msg, channel_private=True)
     Notifier.sns_unread(msg)
 
     return jsonify(notifications=True)
