@@ -11,10 +11,13 @@ import requests
 
 GH_TOKEN = os.environ['REVIEWME_GH_TOKEN']
 SLACK_INCOMING_WEBHOOK_URL = os.environ['REVIEWME_SLACK_URL']
+DEFAULT_GH_REPO = 'nickwu241/review-me'
 g = Github(GH_TOKEN)
 
 app = Flask(__name__)
 CORS(app)
+
+s = None
 
 class Status(object):
     READY = '- [x] READY FOR REVIEW'
@@ -50,7 +53,7 @@ class Status(object):
     def uncheck(self):
         message = self.NOT_READY
         if self.reviewers:
-            message += '\n-' + '\n- '.join(self.reviewers)
+            message += '\n- ' + '\n- '.join(self.reviewers)
         self.comment.edit(message)
 
     def add_reviewers(self, reviewers):
@@ -64,12 +67,14 @@ class Status(object):
         if not self.is_ready:
             return False
 
-        resp = requests.get('https://api.github.com/repos/nickwu241/review-me/pulls/{}/reviews'.format(self.pr_number))
+        resp = requests.get('https://api.github.com/repos/{}/pulls/{}/reviews'.format(
+            DEFAULT_GH_REPO, self.pr_number
+        ))
         if resp.status_code != requests.codes.ok:
             abort(500, "failed to access github reviews API")
 
         last_updated = self.comment.updated_at.replace(tzinfo=UTC)
-        reviews_needed = {}
+        reviews_needed = {r: 0 for r in self.reviewers}
         approved_by = set()
 
         for review in resp.json():
@@ -105,6 +110,13 @@ class Status(object):
 
         print(reviews_needed)
         print(approved_by)
+
+        for a in approved_by:
+            if a in reviews_needed:
+                reviews_needed.pop(a)
+
+        print(reviews_needed)
+
         return len(reviews_needed) > 0
 
 
@@ -166,7 +178,14 @@ def notifications():
 
 @app.route('/should_notify', methods=['GET'])
 def should_notify():
-    s = Status('nickwu241/review-me', 4)
+    global s
+    if not s:
+        # Get default
+        for issue in g.get_repo(DEFAULT_GH_REPO).get_issues():
+            if issue.pull_request:
+                s = Status(DEFAULT_GH_REPO, issue.number)
+                print('using default status', DEFAULT_GH_REPO, issue.number)
+
     n = s.should_notify()
     print('should_notify:', n)
     if n:
@@ -202,6 +221,7 @@ def issues():
     return jsonify(sorted(all_issues, key=lambda i: i['created_at'], reverse=True))
 
 def handle_issue_comment(payload):
+    global s
     repo_id = payload['repository']['id']
     pr_number = int(payload['issue']['pull_request']['url'].split('/')[-1])
     s = Status(repo_id, pr_number)
@@ -210,7 +230,6 @@ def handle_issue_comment(payload):
         # TODO: Make sure we only do work on the status comment getting edited
         if '[x]' in payload['comment']['body']:
             print('Ready for review')
-            Notifier.notify(s)
         else:
             print('Not ready for review')
     elif payload['action'] == 'created' and pr_user(payload) != sender_user(payload):
@@ -218,6 +237,7 @@ def handle_issue_comment(payload):
         s.uncheck()
 
 def handle_pr(payload):
+    global s
     if payload['action'] == 'opened':
         # Someone opened a PR
         s = Status(repo_id(payload), pr_number(payload))
@@ -228,6 +248,7 @@ def handle_pr(payload):
         s.add_reviewers([r['login'] for r in payload['pull_request']['requested_reviewers']])
 
 def handle_pr_review(payload):
+    global s
     # Someone reviewed
     if payload['action'] == 'submitted':
         pass
