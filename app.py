@@ -121,7 +121,8 @@ class Status(object):
 
 
 class Notifier(object):
-    SNS = boto3.resource('sns').Topic('arn:aws:sns:us-west-2:499885130140:review-me')
+    SNS_main = boto3.resource('sns').Topic('arn:aws:sns:us-west-2:499885130140:review-me')
+    SNS_unread = boto3.resource('sns').Topic('arn:aws:sns:us-west-2:499885130140:review-me-unread-notification')
     SLACK_INCOMING_WEBHOOK_URL = SLACK_INCOMING_WEBHOOK_URL
 
     @staticmethod
@@ -143,7 +144,11 @@ class Notifier(object):
 
     @staticmethod
     def sns(message):
-        Notifier.SNS.publish(Subject='Ready for review', Message=message)
+        Notifier.SNS_main.publish(Subject='Ready for review', Message=message)
+
+    @staticmethod
+    def sns_unread(message):
+        Notifier.SNS_unread.publish(Subject='New Unread Github Notifications', Message=message)
 
 @app.route('/')
 def root():
@@ -172,8 +177,10 @@ def notifications():
 
     if len(messages) == 0:
         return jsonify(notifications=False)
+    msg = '{:d} unread GH Notifcations:\n{}'.format(len(messages), '\n'.join(messages))
+    Notifier.slack(msg)
+    Notifier.sns_unread(msg)
 
-    Notifier.slack('{:d} unread GH Notifcations:\n{}'.format(len(messages), '\n'.join(messages)))
     return jsonify(notifications=True)
 
 @app.route('/should_notify', methods=['GET'])
