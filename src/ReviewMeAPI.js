@@ -18,6 +18,17 @@ class ReviewMeAPI {
             console.error(err)
         })
     }
+
+    issues(repos, callback) {
+        fetch(this.API + '/issues?repos=' + repos.join(',')).then((response) => {
+            let data = response.json()
+            return data
+        }).then(data => {
+            callback(data)
+        }).catch(err => {
+            console.error(err)
+        })
+    }
 }
 
 export default ReviewMeAPI
