@@ -174,6 +174,33 @@ def should_notify():
 
     return(jsonify(n))
 
+@app.route('/issues', methods=['GET'])
+def issues():
+    repos = request.args.get('repos').split(',')
+    if not repos:
+        abort(400)
+
+    all_issues = []
+    for repo in repos:
+        for issue in g.get_repo(repo).get_issues():
+            if issue.pull_request:
+                # We don't want pull requests
+                continue
+
+            all_issues.append({
+                'repo_name': issue.repository.name,
+                'repo_url': issue.repository.html_url,
+                'title': issue.title,
+                'url': issue.html_url,
+                'number': issue.number,
+                'state': issue.state,
+                'username': issue.user.login,
+                'created_at': issue.created_at,
+                'labels': [{'name': l.name, 'color': l.color} for l in issue.labels]
+            })
+
+    return jsonify(all_issues)
+
 def handle_issue_comment(payload):
     repo_id = payload['repository']['id']
     pr_number = int(payload['issue']['pull_request']['url'].split('/')[-1])
