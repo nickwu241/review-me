@@ -119,8 +119,8 @@ class Notifier(object):
             status.url
         )
 
-        # Notifier.sns(message)
-        # Notifier.slack(message)
+        Notifier.sns(message)
+        Notifier.slack(message)
 
         print('notify ' + ', '.join(status.reviewers))
         print(message)
