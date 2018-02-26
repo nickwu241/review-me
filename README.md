@@ -8,7 +8,7 @@ Have you ever
 
 If you answered yes to any of those questions, Review Me aims to solve all of those struggles!
 
-Review Me offers automatic notifications to remind PR reviewers, multi-repo issue list, and slack notifications for un-read Github notifications for better productivity.
+Review Me offers automatic notifications to remind PR reviewers, multi-repo issue list, and slack notifications for unread Github notifications for better productivity.
 
 Built using: React, Flask, AWS (EC2, SNS, SQS, SMS, SES, S3, DynamoDB), Github API, Github Webhooks, Slack API, Javascript, Python, and <3
 
