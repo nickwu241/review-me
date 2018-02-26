@@ -16,11 +16,14 @@ Built using: React, Flask, AWS (EC2, SNS, SQS, SMS, SES, S3, DynamoDB), Github A
 Dashboard:
 <img src="/demo/dashboard1.png" />
 <img src="/demo/dashboard2.png" />
+
 One place to see ALL issues across multiple repositories:
 <img src="/demo/issues.png" />
+
 Automatic scheduled Slack, Email, SMS notifications to remind reviewers about unreviewed PRs:
 <img src="/demo/ask_reviewer_slack.png" />
 <img src="/demo/ask_reviewer_email.png" />
-<img src="/demo/ask_reviewer_sms.png" />
+<img src="/demo/ask_reviewer_sms.png" width="360" height="640" />
+
 Slack notifications for your Github notifications:
 <img src="/demo/unread_notifications_slack.png" />
