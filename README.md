@@ -21,7 +21,7 @@ One place to see ALL issues across multiple repositories:
 <img src="https://raw.githubusercontent.com/nickwu241/review-me/master/demo/issues.png" />
 
 Automatic scheduled Slack, Email, SMS notifications to remind reviewers about unreviewed PRs:
-<img src="https://raw.githubusercontent.com/nickwu241/review-me/master/demo/ask_reviewer_email.png" />
+<img src="https://raw.githubusercontent.com/nickwu241/review-me/master/demo/ask_reviewer_slack.png" />
 <img src="https://raw.githubusercontent.com/nickwu241/review-me/master/demo/ask_reviewer_email.png" />
 <img src="https://raw.githubusercontent.com/nickwu241/review-me/master/demo/ask_reviewer_sms.png" width="auto" height="640px"/>
 
