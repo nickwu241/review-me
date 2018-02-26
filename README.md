@@ -14,16 +14,16 @@ Built using: React, Flask, AWS (EC2, SNS, SQS, SMS, SES, S3, DynamoDB), Github A
 
 ## Demo
 Dashboard:
-<img src="/demo/dashboard1.png" />
-<img src="/demo/dashboard2.png" />
+<img src="https://raw.githubusercontent.com/nickwu241/review-me/master/demo/dashboard1.png" />
+<img src="https://raw.githubusercontent.com/nickwu241/review-me/master/demo/dashboard2.png" />
 
 One place to see ALL issues across multiple repositories:
-<img src="/demo/issues.png" />
+<img src="https://raw.githubusercontent.com/nickwu241/review-me/master/demo/issues.png" />
 
 Automatic scheduled Slack, Email, SMS notifications to remind reviewers about unreviewed PRs:
-<img src="/demo/ask_reviewer_slack.png" />
-<img src="/demo/ask_reviewer_email.png" />
-<img src="/demo/ask_reviewer_sms.png" width="360" height="640" />
+<img src="https://raw.githubusercontent.com/nickwu241/review-me/master/demo/ask_reviewer_email.png" />
+<img src="https://raw.githubusercontent.com/nickwu241/review-me/master/demo/ask_reviewer_email.png" />
+<img src="https://raw.githubusercontent.com/nickwu241/review-me/master/demo/ask_reviewer_sms.png" width="360" height="640" />
 
 Slack notifications for your Github notifications:
-<img src="/demo/unread_notifications_slack.png" />
+<img src="https://raw.githubusercontent.com/nickwu241/review-me/master/demo/unread_notifications_slack.png" />
