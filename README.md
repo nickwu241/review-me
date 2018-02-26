@@ -13,8 +13,14 @@ Review Me offers automatic notifications to remind PR reviewers, multi-repo issu
 Built using: React, Flask, AWS (EC2, SNS, SQS, SMS, SES, S3, DynamoDB), Github API, Github Webhooks, Slack API, Javascript, Python, and <3
 
 ## Demo
+Dashboard:
 <img src="/demo/dashboard1.png" />
 <img src="/demo/dashboard2.png" />
+One place to see ALL issues across multiple repositories:
 <img src="/demo/issues.png" />
+Automatic scheduled Slack, Email, SMS notifications to remind reviewers about unreviewed PRs:
 <img src="/demo/ask_reviewer_slack.png" />
+<img src="/demo/ask_reviewer_email.png" />
+<img src="/demo/ask_reviewer_sms.png" />
+Slack notifications for your Github notifications:
 <img src="/demo/unread_notifications_slack.png" />
