@@ -16,3 +16,5 @@ Built using: React, Flask, AWS (EC2, SNS, SQS, SMS, SES, S3, DynamoDB), Github A
 <img src="/demo/dashboard1.png" />
 <img src="/demo/dashboard2.png" />
 <img src="/demo/issues.png" />
+<img src="/demo/ask_reviewer_slack.png" />
+<img src="/demo/unread_notifications_slack.png" />
